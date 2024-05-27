@@ -1,0 +1,5 @@
+sqlite3
+kivy
+kivymd
+flask
+flask_cors
