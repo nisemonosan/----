@@ -20,8 +20,8 @@ def add_store():
     category = data.get("category")
     budget = data.get("budget")
     memo = data.get("memo")
-    check = data.get("check", False)
-    api.add_store(name, address, category, budget, memo, check)
+    checked = 0
+    api.add_store(name, address, category, budget, memo, checked)
     return jsonify({"message": "Store added successfully"}), 201
 
 @app.route("/store/<int:store_id>", methods=["PUT"])

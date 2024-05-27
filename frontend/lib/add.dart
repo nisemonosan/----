@@ -1,10 +1,14 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:namer_app/main.dart';
 
+var apiUrl= 'http://127.0.0.1:5000';
 
 class AddPage extends StatelessWidget {
-  String? name,adress,category,budget,memo;
+  
+  String? name,address,category,budget,memo;
   String? isSelectedValue;
 
   @override
@@ -70,7 +74,7 @@ class AddPage extends StatelessWidget {
                     )
                   ),
                   onChanged: (text) {
-                    adress = text;
+                    address = text;
                   },
                 )
               ),
@@ -156,12 +160,15 @@ class AddPage extends StatelessWidget {
               ),
               Container(
                 width: double.infinity,
+                height: 140,
                 padding: EdgeInsets.symmetric(horizontal: 30,vertical: 20),
                 child:TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  expands: true,
                   decoration: InputDecoration(
-                    
+                    prefixIcon: Icon(Icons.message_rounded),
                     fillColor: Colors.grey[50],
-                    labelText: 'Memo',
                     floatingLabelStyle: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -170,7 +177,7 @@ class AddPage extends StatelessWidget {
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
-                    hintText: '任意で入力してください。',
+                    hintText: 'メモ : 任意で入力してください。',
                     hintStyle: TextStyle(
                       fontSize: 12
                     )
@@ -180,6 +187,17 @@ class AddPage extends StatelessWidget {
                   },
                 )
               ),
+              Container(
+                child:ElevatedButton(
+                  onPressed: () {
+                    addStoresInfo(context, name, address, category, budget, memo);
+                  },
+                  child: Text('登録する',style: TextStyle(color: Colors.black,)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    foregroundColor: Colors.black),
+                ),)
+              
             ]
               
           )
@@ -187,6 +205,27 @@ class AddPage extends StatelessWidget {
         
       )
     );
+  }
+
+  Future addStoresInfo(context,name,address,category,budget,memo) async {
+    final response = await http.post(Uri.parse('$apiUrl/store'),
+    headers: {'Content-type':'application/json; charset=UTF-8',},
+    body: jsonEncode({
+      'name':name,
+      'address':address,
+      'category':category,
+      'budget':budget,
+      'memo':memo,
+    }),
+    );
+
+    if (response.statusCode == 201) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    }
+    
   }
 }
 

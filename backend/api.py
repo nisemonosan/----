@@ -25,14 +25,14 @@ CREATE TABLE IF NOT EXISTS store (
 c.execute(create_table_sql)
 conn.commit()
 
-def add_store(name, address, category=None, budget=None, memo=None, check=False):
+def add_store(name, address, category=None, budget=None, memo=None, checked=None):
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
     insert_sql = '''
-    INSERT INTO store (name, address, category, budget, memo, check)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO store (name, address, category, budget, memo, checked)
+    VALUES (?, ?, ?, ?, ?, ?)
     '''
-    c.execute(insert_sql, (name, address, category, budget, memo, check))
+    c.execute(insert_sql, (name, address, category, budget, memo, checked))
     conn.commit()
     conn.close()
 
