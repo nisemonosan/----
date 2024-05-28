@@ -192,10 +192,10 @@ class AddPage extends StatelessWidget {
                   onPressed: () {
                     addStoresInfo(context, name, address, category, budget, memo);
                   },
-                  child: Text('登録する',style: TextStyle(color: Colors.black,)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.yellow,
                     foregroundColor: Colors.black),
+                  child: Text('登録する', style: TextStyle(color: Colors.black)),
                 ),)
               
             ]

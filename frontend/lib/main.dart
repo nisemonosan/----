@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
 
 
 class Home extends StatelessWidget {
-  
+  ScrollController scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -60,50 +60,55 @@ class Home extends StatelessWidget {
               ),
 
               Expanded(
-                child: FutureBuilder(
-                  future: fetchStores(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done) {
-                        if (snapshot.hasData) {
-                          List<Map<String, dynamic>> stores = snapshot.data;
-                          
-                            return ListView.builder(
-                              itemCount: stores.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  margin: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
-                                  child:ListTile(
-                                    tileColor: Colors.white,
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    title: Text(stores[index]['name'],style:TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Color.fromARGB(255, 5, 42, 155)),),
-                                    subtitle:Column(
-                                      children: [
-                                        Row(
-                                          children:[
-                                            Container(
-                                              padding: EdgeInsets.only(left:2,right: 2),
-                                              child:Icon(Icons.location_on_outlined,size:22),),
-                                        
-                                            Container(child:Text(stores[index]['address'],style:TextStyle(fontSize: 16,fontWeight: FontWeight.normal))),
-                                          ]
-                                        ),
-
-                                        Container(
-                                          child: FutureBuilder(
-                                            future: calculateDistance(stores[index]['locate'], stores[index]['address']),
-                                            builder: (context, snapshot) {
-                                              if (snapshot.connectionState == ConnectionState.done) {
-                                                if (snapshot.hasData) {
-                                                  return Text(snapshot.data.toString());
-                                                } else if (snapshot.hasError) {
-                                                  return Text('Error: ${snapshot.error}');
-                                                }
-                                              }
-                                              return CircularProgressIndicator();
-                                            },
+                child: Scrollbar(
+                  controller: scrollController,
+                  child: FutureBuilder(
+                    future: fetchStores(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.hasData) {
+                            List<Map<String, dynamic>> stores = snapshot.data;
+                            
+                              return ListView.builder(
+                                controller: scrollController,
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemCount: stores.length,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    margin: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
+                                    child:ListTile(
+                                      tileColor: Colors.white,
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      title: Text(stores[index]['name'],style:TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Color.fromARGB(255, 5, 42, 155)),),
+                                      subtitle:Column(
+                                        children: [
+                                          Row(
+                                            children:[
+                                              Container(
+                                                padding: EdgeInsets.only(left:2,right: 2),
+                                                child:Icon(Icons.location_on_outlined,size:22),),
+                                          
+                                              Container(child:Text(stores[index]['address'],style:TextStyle(fontSize: 16,fontWeight: FontWeight.normal))),
+                                            ]
                                           ),
+
+                                          Container(
+                                            child: FutureBuilder(
+                                              future: calculateDistance(stores[index]['locate'], stores[index]['address']),
+                                              builder: (context, snapshot) {
+                                                if (snapshot.connectionState == ConnectionState.done) {
+                                                  if (snapshot.hasData) {
+                                                    return Text(snapshot.data.toString());
+                                                  } else if (snapshot.hasError) {
+                                                    return Text('Error: ${snapshot.error}');
+                                                  }
+                                                }
+                                                return CircularProgressIndicator();
+                                              },
+                                            ),
                                         )
                                       ]
                                     )
@@ -114,10 +119,11 @@ class Home extends StatelessWidget {
                         } else if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
                         }
-                      }
+                        }
                       return Center(child: CircularProgressIndicator());
                     },
-                ),
+                  ),
+                )
               )
             ]
           ),
