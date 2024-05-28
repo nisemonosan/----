@@ -1,187 +1,127 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:geolocator/geolocator.dart';
 
 import 'package:namer_app/add.dart';
-
-var apiUrl= 'http://127.0.0.1:5000';
-List<Map<String, dynamic>> fetchedData = []; // 一時的にデータを保存する変数
+import 'package:namer_app/database.dart'; // データベース関連のファイルをインポート
 
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  
+  const MyApp({Key? key});
 
   @override
   Widget build(BuildContext context) {
+     ThemeMode mode = ThemeMode.system;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'GohanMemo',
-      theme: ThemeData(
-        fontFamily: 'LINESeed',
-      ),
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: mode,
       home: Home(),
     );
   }
 }
 
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => _HomeState();
+}
 
-class Home extends StatelessWidget {
+class _HomeState extends State<Home> {
   ScrollController scrollController = ScrollController();
+  List<Map<String, dynamic>> stores = [];
+
+  @override
+  void initState() {
+    super.initState();
+    GohannDB.openDb();
+    fetchStores();
+  }
+
+  Future<void> fetchStores() async {
+    List<Map<String, dynamic>> fetchedStores = await GohannDB.getAllStores();
+    setState(() {
+      stores = fetchedStores;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-          appBar: AppBar(
-            actions: [IconButton(icon: Icon(Icons.sort),onPressed: (){},)],
-            backgroundColor: Colors.grey[50],
-            elevation: 1,
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: Icon(Icons.sort),
+            onPressed: () {},
           ),
-          backgroundColor: Color.fromARGB(255, 239, 243, 255),
-          body: Column(
-            children: [
-              Container(
-                margin: EdgeInsets.all(15),
-                width: double.infinity,
-                child: Text(
-                'Check!',
-                textAlign: TextAlign.left,
-                style:TextStyle(
-                  color:Colors.black,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold
-                )),
-              ),
-
-              Expanded(
-                child: Scrollbar(
-                  controller: scrollController,
-                  child: FutureBuilder(
-                    future: fetchStores(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          if (snapshot.hasData) {
-                            List<Map<String, dynamic>> stores = snapshot.data;
-                            
-                              return ListView.builder(
-                                controller: scrollController,
-                                scrollDirection: Axis.vertical,
-                                shrinkWrap: true,
-                                itemCount: stores.length,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    margin: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
-                                    child:ListTile(
-                                      tileColor: Colors.white,
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      title: Text(stores[index]['name'],style:TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Color.fromARGB(255, 5, 42, 155)),),
-                                      subtitle:Column(
-                                        children: [
-                                          Row(
-                                            children:[
-                                              Container(
-                                                padding: EdgeInsets.only(left:2,right: 2),
-                                                child:Icon(Icons.location_on_outlined,size:22),),
-                                          
-                                              Container(child:Text(stores[index]['address'],style:TextStyle(fontSize: 16,fontWeight: FontWeight.normal))),
-                                            ]
-                                          ),
-
-                                          Container(
-                                            child: FutureBuilder(
-                                              future: calculateDistance(stores[index]['locate'], stores[index]['address']),
-                                              builder: (context, snapshot) {
-                                                if (snapshot.connectionState == ConnectionState.done) {
-                                                  if (snapshot.hasData) {
-                                                    return Text(snapshot.data.toString());
-                                                  } else if (snapshot.hasError) {
-                                                    return Text('Error: ${snapshot.error}');
-                                                  }
-                                                }
-                                                return CircularProgressIndicator();
-                                              },
-                                            ),
-                                        )
-                                      ]
-                                    )
-                                  )
-                                );
-                              },
-                            );
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        }
-                        }
-                      return Center(child: CircularProgressIndicator());
+        ],
+        backgroundColor: Colors.grey[50],
+        elevation: 1,
+      ),
+      backgroundColor: Color.fromARGB(255, 239, 243, 255),
+      body: 
+        Container(
+          child:Scrollbar(
+            controller: scrollController,
+            child:Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(30),
+                  child:Text('Check!',textAlign:TextAlign.left,style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),)),
+                    
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await fetchStores();
                     },
-                  ),
+                    child:ListView.builder(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      controller: scrollController,
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemCount: stores.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: EdgeInsets.symmetric(vertical: 5,horizontal: 20),
+                          child:ListTile(
+                            tileColor: Colors.white,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),
+                            title: Text('${stores[index]['name']}',style:TextStyle(fontWeight: FontWeight.bold,fontSize: 24,color: Color.fromARGB(255, 5, 42, 155))),
+                            subtitle: Row(
+                              children: [
+                                SizedBox(child:Icon(Icons.location_on_outlined,size:22)),
+                                SizedBox(child:Text('${stores[index]['address']}',style:TextStyle(fontSize: 16,fontWeight: FontWeight.normal)))
+                              ],)
+                          )
+                        );
+                      }
+                    )
+                  )
                 )
-              )
-            ]
+              ],
+            )  
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AddPage()),
-              );
-            },
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-            elevation: 0,
-            backgroundColor: Colors.yellow,
-            child: const Icon(Icons.add),
-          )
+        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddPage()),
+          );
+        },
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+        elevation: 0,
+        backgroundColor: Colors.yellow,
+        child: const Icon(Icons.add),
+      ),
     );
-  }
-
-  Future fetchStores() async {
-     Position locate = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    List<Map<String, dynamic>> stores = []; // storesリストの要素をMap型に変更
-    final response = await http.get(Uri.parse('$apiUrl/stores'));
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      stores = List<Map<String, dynamic>>.from(data.map((item) => {
-        'id': item[0],
-        'name': item[1],
-        'address': item[2],
-        'category': item[3],
-        'budget': item[4],
-        'memo': item[5],
-        'checked': item[6],
-        'locate': [locate.latitude, locate.longitude],
-      })); // 店名と住所のみを取得して格納
-      return stores;
-    } else {
-      return Exception('Failed to load stores');
-    }
-  }
-
-  Future calculateDistance(locate,target) async {
-    final response = await http.post(Uri.parse('$apiUrl/distance'),
-    headers: {'Content-type':'application/json; charset=UTF-8',},
-    body: jsonEncode({
-      'current_location': [locate[0],locate[1]],
-      'destination_address': target,
-    }),
-    );
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = jsonDecode(response.body);
-      var distance = data['distance'];
-      return distance;
-    } else {
-      return Exception('Failed to calculate distance');
-    }
   }
 }
-
-
-

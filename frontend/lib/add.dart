@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:namer_app/main.dart';
 
-var apiUrl= 'http://127.0.0.1:5000';
+import 'package:namer_app/database.dart'; // データベース関連のファイルをインポート
+
 
 class AddPage extends StatelessWidget {
   
-  String? name,address,category,budget,memo;
+  late String name, address;
+  String? category, budget, memo;
   String? isSelectedValue;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(icon: Icon(Icons.arrow_back),onPressed: (){Navigator.of(context).pop();},),
+        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: (){Navigator.of(context).pop();}),
         backgroundColor: Colors.grey[50],
         elevation: 1,
       ),
       backgroundColor: Color.fromARGB(255, 255, 255, 255),
       body: Center(
-        child:Container(
-          child:Column(
+        child: Container(
+          child: Column(
             children: [
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 30,vertical: 20),
-                child:TextFormField(
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                child: TextFormField(
                   autofocus: true,
                   decoration: InputDecoration(
                     fillColor: Colors.grey[50],
@@ -43,22 +42,21 @@ class AddPage extends StatelessWidget {
                     ),
                     hintText: '店名を入力してください',
                     hintStyle: TextStyle(
-                      fontSize: 12
-                    )
+                      fontSize: 12,
+                    ),
                   ),
                   onChanged: (text) {
                     name = text;
                   },
-                )
+                ),
               ),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 30,vertical: 20),
-                child:TextFormField(
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                child: TextFormField(
                   decoration: InputDecoration(
-                    
                     prefixIcon: Icon(Icons.location_on),
-                    labelText: 'Adress',
+                    labelText: 'Address',
                     floatingLabelStyle: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -66,22 +64,21 @@ class AddPage extends StatelessWidget {
                     labelStyle: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      
                     ),
                     hintText: '住所を入力してください',
                     hintStyle: TextStyle(
-                      fontSize: 12
-                    )
+                      fontSize: 12,
+                    ),
                   ),
                   onChanged: (text) {
                     address = text;
                   },
-                )
+                ),
               ),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 30,vertical: 20),
-                child:TextFormField(
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                child: TextFormField(
                   decoration: InputDecoration(
                     fillColor: Colors.grey[50],
                     labelText: 'Category',
@@ -96,19 +93,19 @@ class AddPage extends StatelessWidget {
                     ),
                     hintText: '店のカテゴリーを入力してください。',
                     hintStyle: TextStyle(
-                      fontSize: 12
-                    )
+                      fontSize: 12,
+                    ),
                   ),
                   onChanged: (text) {
                     category = text;
                   },
-                )
+                ),
               ),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 30,vertical: 20),
-                child:DropdownButtonFormField(
-                  items: const[
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                child: DropdownButtonFormField(
+                  items: const [
                     DropdownMenuItem(
                       value: '1円から1,000円',
                       child: Text('1円から1,000円'),
@@ -148,21 +145,20 @@ class AddPage extends StatelessWidget {
                     ),
                     hintText: '店の価格帯を選択してください。',
                     hintStyle: TextStyle(
-                      fontSize: 12
-                    )
+                      fontSize: 12,
+                    ),
                   ),
                   value: isSelectedValue,
-                  onChanged: (String? value) {
+                  onChanged: (value) {
                     budget = value;
                   },
-                )
-                  
+                ),
               ),
               Container(
                 width: double.infinity,
                 height: 140,
-                padding: EdgeInsets.symmetric(horizontal: 30,vertical: 20),
-                child:TextFormField(
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                child: TextFormField(
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   expands: true,
@@ -179,53 +175,31 @@ class AddPage extends StatelessWidget {
                     ),
                     hintText: 'メモ : 任意で入力してください。',
                     hintStyle: TextStyle(
-                      fontSize: 12
-                    )
+                      fontSize: 12,
+                    ),
                   ),
                   onChanged: (text) {
-                    category = text;
+                    memo = text;
                   },
-                )
+                ),
               ),
               Container(
-                child:ElevatedButton(
+                child: ElevatedButton(
                   onPressed: () {
-                    addStoresInfo(context, name, address, category, budget, memo);
+                    GohannDB.addStore(name, address, category: category, budget: budget, memo: memo);
+                    Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.yellow,
-                    foregroundColor: Colors.black),
+                    foregroundColor: Colors.black,
+                  ),
                   child: Text('登録する', style: TextStyle(color: Colors.black)),
-                ),)
-              
-            ]
-              
-          )
-        )
-        
-      )
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
-  }
-
-  Future addStoresInfo(context,name,address,category,budget,memo) async {
-    final response = await http.post(Uri.parse('$apiUrl/store'),
-    headers: {'Content-type':'application/json; charset=UTF-8',},
-    body: jsonEncode({
-      'name':name,
-      'address':address,
-      'category':category,
-      'budget':budget,
-      'memo':memo,
-    }),
-    );
-
-    if (response.statusCode == 201) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Home()),
-      );
-    }
-    
   }
 }
-
