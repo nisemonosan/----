@@ -28,6 +28,12 @@ class AddPage extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
                 child: TextFormField(
                   autofocus: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '必須項目です。';
+                    }
+                    return null;
+                  },
                   decoration: InputDecoration(
                     fillColor: Colors.grey[50],
                     labelText: 'Store Name',
@@ -54,6 +60,12 @@ class AddPage extends StatelessWidget {
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
                 child: TextFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '必須項目です。';
+                    }
+                    return null;
+                  },
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.location_on),
                     labelText: 'Address',
