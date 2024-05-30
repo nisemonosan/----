@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:namer_app/add.dart';
-import 'package:namer_app/database.dart'; // データベース関連のファイルをインポート
+import 'package:namer_app/database.dart';
+import 'package:namer_app/detail.dart'; // データベース関連のファイルをインポート
 
 
 Future<void> main() async {
@@ -88,18 +89,26 @@ class _HomeState extends State<Home> {
                       shrinkWrap: true,
                       itemCount: stores.length,
                       itemBuilder: (context, index) {
-                        return Container(
-                          margin: EdgeInsets.symmetric(vertical: 5,horizontal: 20),
-                          child:ListTile(
-                            tileColor: Colors.white,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),
-                            title: Text('${stores[index]['name']}',style:TextStyle(fontWeight: FontWeight.bold,fontSize: 24,color: Color.fromARGB(255, 5, 42, 155))),
-                            subtitle: Row(
-                              children: [
-                                SizedBox(child:Icon(Icons.location_on_outlined,size:22)),
-                                SizedBox(child:Text('${stores[index]['address']}',style:TextStyle(fontSize: 16,fontWeight: FontWeight.normal)))
-                              ],)
+                        return GestureDetector(
+                          onTap: () { 
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Detail(id: stores[index]['id'])),
+                            );
+                          },
+                          child : Container(
+                            margin: EdgeInsets.symmetric(vertical: 5,horizontal: 20),
+                            child:ListTile(
+                              tileColor: Colors.white,
+                              contentPadding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),
+                              title: Text('${stores[index]['name']}',style:TextStyle(fontWeight: FontWeight.bold,fontSize: 24,color: Color.fromARGB(255, 5, 42, 155))),
+                              subtitle: Row(
+                                children: [
+                                  SizedBox(child:Icon(Icons.location_on_outlined,size:22)),
+                                  SizedBox(child:Text('${stores[index]['address']}',style:TextStyle(fontSize: 16,fontWeight: FontWeight.normal)))
+                                ],)
+                            )
                           )
                         );
                       }

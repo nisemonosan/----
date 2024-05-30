@@ -40,6 +40,15 @@ class GohannDB {
     );
     }
 
+  static Future<Map<String, dynamic>> getStoreById(int storeId) async {
+    var db = await openDb();
+    List<Map<String, dynamic>> stores = await db.query('store', where: 'id = ?', whereArgs: [storeId]);
+    if (stores.isEmpty) {
+      throw Exception('Store with id $storeId not found');
+    }
+    return stores.first;
+  }
+
   static Future<void> updateStore(int storeId, {String? name, String? address, String? category, String? budget, String? memo, int? check}) async {
     var db = await openDb();
     final Map<String, dynamic> data = {
