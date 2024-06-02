@@ -1,3 +1,7 @@
+
+
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:flutter/material.dart';
 import 'package:namer_app/database.dart';
 
@@ -11,6 +15,7 @@ class Detail extends StatefulWidget {
 
 class _DetailState extends State<Detail>{
   List store = [];
+  var url = '';
 
   @override
     void initState() {
@@ -29,6 +34,7 @@ class _DetailState extends State<Detail>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title:Title(color:Colors.black, child: Text('店の詳細')),
         actions: [
           IconButton(
             icon: Icon(Icons.sort),
@@ -48,6 +54,34 @@ class _DetailState extends State<Detail>{
               Container(
                 width: double.infinity,
                 child: Text(store[0]['name'],style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30,color: Color.fromARGB(255, 5, 42, 155)),),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 15),
+                child: GestureDetector(
+                  onTap: () {
+                    Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${store[0]['address']}');
+                    launchUrl(url);
+                  },
+                  child: Row(
+                    children: [
+                      SizedBox(child:Icon(Icons.location_on_outlined,size:30)),
+                      SizedBox(child:Text('${store[0]['address']}',style:TextStyle(fontSize: 20,fontWeight: FontWeight.bold)))
+                    ],
+                  ),
+                )
+              ),
+              Container(
+                child: Column(
+                  children: [
+                    Container(
+                      child: Row(
+                        children: [
+                          Text('カテゴリー'),
+                          if (store[0]['category'] == null)  Text('未設定') else Text('${store[0]['category']}')
+                        ],
+                      ),
+                    ),
+                ],),
               )
             ],
           ),

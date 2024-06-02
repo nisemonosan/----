@@ -1,9 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 const dbFile = 'store_info.db';
 
-class GohannDB {
+class GohannDB extends ChangeNotifier {
   static Future<Database> openDb() async {
     return await openDatabase(
       join(await getDatabasesPath(), dbFile),
