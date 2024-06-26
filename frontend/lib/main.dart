@@ -4,7 +4,10 @@ import 'package:flutter/widgets.dart';
 import 'package:namer_app/add.dart';
 import 'package:namer_app/database.dart';
 import 'package:namer_app/detail.dart'; // データベース関連のファイルをインポート
+import 'package:namer_app/locate.dart';
 import 'package:namer_app/theme.dart';
+
+import 'widgets/multi_fab.dart';
 
 
 Future<void> main() async {
@@ -118,17 +121,32 @@ class _HomeState extends State<Home> {
             )  
           ),
         ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddPage()),
-          );
-        },
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-        elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        child: const Icon(Icons.add,color: Colors.black,),
+      floatingActionButton: MultiFloatingActionButton(
+        mainButtonColor: Theme.of(context).colorScheme.secondary,
+        expandedButtonColor: Theme.of(context).colorScheme.secondary,
+        items: [
+          FABItem(
+            icon: Icons.add,
+            tooltip: 'Add',
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => AddPage()));
+            },
+          ),
+          FABItem(
+            icon: Icons.location_on_outlined,
+            tooltip: 'Locate',
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => locate()));
+            },
+          ),
+          FABItem(
+            icon: Icons.inbox,
+            tooltip: 'Inbox',
+            onPressed: () {
+              print('Inbox button pressed');
+            },
+          ),
+        ],
       ),
     );
   }
